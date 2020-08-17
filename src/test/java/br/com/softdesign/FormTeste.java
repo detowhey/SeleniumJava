@@ -1,31 +1,22 @@
 package br.com.softdesign;
 
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
-public class TestGoogle {
+public class FormTeste {
 
     @BeforeClass
     public static void configurarParametros() {
         System.setProperty("webdriver.chrome.driver", "C:/Users/henrique.almeida/Documents/henrique/drivers/chromedriver.exe");
+
     }
 
     @Test
-    public void testarGoogle() {
-
+    public void testarPaginaHTML() {
         WebDriver driver = new ChromeDriver();
-
-        driver.get("http://www.google.com");
-//        driver.manage().window().setPosition(new Point(100, 100));
-        driver.manage().window().maximize();
+        driver.get("file://" + System.getProperty("user.dir") + "/src/test/resources/componentes.html");
         driver.quit();
-    }
-
-    @AfterClass
-    public static void fecharSistema() {
-        System.exit(0);
     }
 }
