@@ -23,9 +23,4 @@ public class TestGoogle {
         driver.manage().window().maximize();
         driver.quit();
     }
-
-    @AfterClass
-    public static void fecharSistema() {
-        System.exit(0);
-    }
 }
