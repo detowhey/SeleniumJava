@@ -24,12 +24,9 @@ public class FormularioTeste {
     public void validarValorTextField() {
         WebDriver driver = new ChromeDriver();
         driver.get("file://" + System.getProperty("user.dir") + "/src/test/resources/componentes.html");
-
         driver.findElement(By.id("elementosForm:nome")).sendKeys("Escrita");
-        driver.findElement(By.id("elementosForm:nome")).getAttribute("value");
 
         assertEquals("Escrita", driver.findElement(By.id("elementosForm:nome")).getAttribute("value"));
-
         driver.quit();
     }
 
@@ -112,12 +109,14 @@ public class FormularioTeste {
         comboBox.selectByVisibleText("Natacao");
         comboBox.selectByVisibleText("Corrida");
         comboBox.selectByVisibleText("O que eh esporte?");
+
         List<WebElement> listaElemento = comboBox.getAllSelectedOptions();
         assertEquals(3, listaElemento.size());
 
         comboBox.deselectByVisibleText("Natacao");
         listaElemento = comboBox.getAllSelectedOptions();
         assertEquals(2, listaElemento.size());
+        driver.quit();
     }
 
     @Test
@@ -125,7 +124,20 @@ public class FormularioTeste {
         WebDriver driver = new ChromeDriver();
         driver.get("file://" + System.getProperty("user.dir") + "/src/test/resources/componentes.html");
 
-        
+        WebElement botao = driver.findElement(By.id("buttonSimple"));
+        botao.click();
 
+        assertEquals("Obrigado!", botao.getAttribute("value"));
+        driver.quit();
+    }
+
+    @Test
+    public void clicarLink(){
+        WebDriver driver = new ChromeDriver();
+        driver.get("file://" + System.getProperty("user.dir") + "/src/test/resources/componentes.html");
+
+        WebElement link = driver.findElement(By.linkText("Voltar"));
+        link.click();
+        driver.quit();
     }
 }
