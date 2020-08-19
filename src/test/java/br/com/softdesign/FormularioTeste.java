@@ -16,6 +16,7 @@ import static org.junit.Assert.assertTrue;
 public class FormularioTeste {
 
     private WebDriver webDriver;
+    private Utilitarios utiliatarios;
 
     @BeforeClass
     public static void configurarParametros() {
@@ -26,6 +27,7 @@ public class FormularioTeste {
     public void inicializarConfiguracaoDoWebDriver() {
         webDriver = new ChromeDriver();
         webDriver.get(System.getProperty("user.dir") + "/src/test/resources/componentes.html");
+        utiliatarios = new Utilitarios(webDriver);
     }
 
     @After
@@ -36,36 +38,37 @@ public class FormularioTeste {
     @Test
     public void validarValorTextField() {
 
-        webDriver.findElement(By.id("elementosForm:nome")).sendKeys("Escrita");
-        assertEquals("Escrita", webDriver.findElement(By.id("elementosForm:nome")).getAttribute("value"));
+        utiliatarios.escreverTextoPeloId("elementosForm:nome", "Escrita");
+        assertEquals("Escrita", utiliatarios.pegarValorCampo("elementosForm:nome"));
     }
 
     @Test
     public void validarValorTextArea() {
 
-        webDriver.findElement(By.id("elementosForm:sugestoes")).sendKeys("Escrita, teste, henrique");
-        assertEquals("Escrita, teste, henrique",
-                webDriver.findElement(By.id("elementosForm:sugestoes")).getAttribute("value"));
+        utiliatarios.escreverTextoPeloId("elementosForm:sugestoes", "Escrita, teste, henrique");
+        assertEquals("Escrita, teste, henrique", utiliatarios.pegarValorCampo("elementosForm:sugestoes"));
     }
 
     @Test
     public void clicarRadioButton() {
 
-        webDriver.findElement(By.id("elementosForm:sexo:0")).click();
-        assertTrue(webDriver.findElement(By.id("elementosForm:sexo:0")).isSelected());
+        WebElement elemento = utiliatarios.pesquisarElementoPeloId("elementosForm:sexo:0");
+        elemento.click();
+        assertTrue(elemento.isSelected());
     }
 
     @Test
     public void clicarCheckBox() {
 
-        webDriver.findElement(By.id("elementosForm:comidaFavorita:2")).click();
-        assertTrue(webDriver.findElement(By.id("elementosForm:comidaFavorita:2")).isSelected());
+        WebElement elemento = utiliatarios.pesquisarElementoPeloId("elementosForm:comidaFavorita:2");
+        elemento.click();
+        assertTrue(elemento.isEnabled());
     }
 
     @Test
     public void selecionarOpcaoComboBox() {
 
-        WebElement elemento = webDriver.findElement(By.id("elementosForm:escolaridade"));
+        WebElement elemento = utiliatarios.pesquisarElementoPeloId("elementosForm:escolaridade");
         Select comboBox = new Select(elemento);
         //comboBox.selectByIndex(2) -> index;
         //comboBox.selectByValue("superior") -> value;
@@ -76,8 +79,7 @@ public class FormularioTeste {
     @Test
     public void verificarValorOpcaoComboBox() {
 
-        webDriver.get(System.getProperty("user.dir") + "/src/test/resources/componentes.html");
-        WebElement elemento = webDriver.findElement(By.id("elementosForm:escolaridade"));
+        WebElement elemento = utiliatarios.pesquisarElementoPeloId("elementosForm:escolaridade");
 
         Select comboBox = new Select(elemento);
         List<WebElement> listaElementos = comboBox.getOptions();
@@ -89,7 +91,7 @@ public class FormularioTeste {
     @Test
     public void verificarMultiplaEscolhaComboBox() {
 
-        WebElement elemento = webDriver.findElement(By.id("elementosForm:esportes"));
+        WebElement elemento = utiliatarios.pesquisarElementoPeloId("elementosForm:esportes");
         Select comboBox = new Select(elemento);
 
         comboBox.selectByVisibleText("Natacao");
@@ -107,13 +109,12 @@ public class FormularioTeste {
     @Test
     public void clicarBotao() {
 
-        WebElement botaoHTML = webDriver.findElement(By.id("buttonSimple"));
-        botaoHTML.click();
-        assertEquals("Obrigado!", botaoHTML.getAttribute("value"));
+        WebElement elemento = utiliatarios.pesquisarElementoPeloId("buttonSimple");
+        elemento.click();
+        assertEquals("Obrigado!", utiliatarios.pegarValorCampo("buttonSimple"));
     }
 
     @Test
-    @Ignore
     public void clicarLink() {
 
         WebElement link = webDriver.findElement(By.linkText("Voltar"));
