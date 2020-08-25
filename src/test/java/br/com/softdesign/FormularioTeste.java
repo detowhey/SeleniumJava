@@ -1,6 +1,9 @@
 package br.com.softdesign;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -10,13 +13,15 @@ import org.openqa.selenium.support.ui.Select;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.*;
 
 public class FormularioTeste {
 
     private WebDriver webDriver;
-    private Utilitarios utiliatarios;
+    private Utilitarios utilitario;
+    private CampoTreinamentoPage pagina;
 
     @BeforeClass
     public static void configurarParametros() {
@@ -24,10 +29,11 @@ public class FormularioTeste {
     }
 
     @Before
-    public void inicializarConfiguracaoDoWebDriver() {
+    public void inserirConfiguracaoInicial() {
         webDriver = new ChromeDriver();
         webDriver.get(System.getProperty("user.dir") + "/src/test/resources/componentes.html");
-        utiliatarios = new Utilitarios(webDriver);
+        utilitario = new Utilitarios(webDriver);
+        pagina = new CampoTreinamentoPage(webDriver);
     }
 
     @After
@@ -36,50 +42,33 @@ public class FormularioTeste {
     }
 
     @Test
-    public void validarValorTextField() {
+    public void validarSobrenomeObrigatorio() {
 
-        utiliatarios.escreverTextoPeloId("elementosForm:nome", "Escrita");
-        assertEquals("Escrita", utiliatarios.pegarValorCampo("elementosForm:nome"));
-    }
-
-    @Test
-    public void validarValorTextArea() {
-
-        utiliatarios.escreverTextoPeloId("elementosForm:sugestoes", "Escrita, teste, henrique");
-        assertEquals("Escrita, teste, henrique", utiliatarios.pegarValorCampo("elementosForm:sugestoes"));
-    }
-
-    @Test
-    public void clicarRadioButton() {
-
-        WebElement elemento = utiliatarios.pesquisarElementoPeloId("elementosForm:sexo:0");
-        elemento.click();
-        assertTrue(elemento.isSelected());
+        pagina.setNome("Henrique");
+        pagina.clicarBotaoCadastrar();
+        assertThat(pagina.obterTextoAlertaConfirmar(), equalToIgnoringCase("sobrenome eh obrigatorio"));
     }
 
     @Test
     public void clicarCheckBox() {
 
-        WebElement elemento = utiliatarios.pesquisarElementoPeloId("elementosForm:comidaFavorita:2");
-        elemento.click();
+        WebElement elemento = utilitario.pesquisarElemento("elementosForm:comidaFavorita:2");
         assertTrue(elemento.isEnabled());
     }
 
     @Test
     public void selecionarOpcaoComboBox() {
 
-        WebElement elemento = utiliatarios.pesquisarElementoPeloId("elementosForm:escolaridade");
+        WebElement elemento = utilitario.pesquisarElemento("elementosForm:escolaridade");
         Select comboBox = new Select(elemento);
-        //comboBox.selectByIndex(2) -> index;
-        //comboBox.selectByValue("superior") -> value;
-        comboBox.selectByVisibleText("Mestrado")/* -> valor mostrado na página HTML*/;
+        comboBox.selectByVisibleText("Mestrado");
         assertEquals("Mestrado", comboBox.getFirstSelectedOption().getText());
     }
 
     @Test
     public void verificarValorOpcaoComboBox() {
 
-        WebElement elemento = utiliatarios.pesquisarElementoPeloId("elementosForm:escolaridade");
+        WebElement elemento = utilitario.pesquisarElemento("elementosForm:escolaridade");
 
         Select comboBox = new Select(elemento);
         List<WebElement> listaElementos = comboBox.getOptions();
@@ -89,29 +78,11 @@ public class FormularioTeste {
     }
 
     @Test
-    public void verificarMultiplaEscolhaComboBox() {
-
-        WebElement elemento = utiliatarios.pesquisarElementoPeloId("elementosForm:esportes");
-        Select comboBox = new Select(elemento);
-
-        comboBox.selectByVisibleText("Natacao");
-        comboBox.selectByVisibleText("Corrida");
-        comboBox.selectByVisibleText("O que eh esporte?");
-
-        List<WebElement> listaElemento = comboBox.getAllSelectedOptions();
-        assertEquals(3, listaElemento.size());
-
-        comboBox.deselectByVisibleText("Natacao");
-        listaElemento = comboBox.getAllSelectedOptions();
-        assertEquals(2, listaElemento.size());
-    }
-
-    @Test
     public void clicarBotao() {
 
-        WebElement elemento = utiliatarios.pesquisarElementoPeloId("buttonSimple");
-        elemento.click();
-        assertEquals("Obrigado!", utiliatarios.pegarValorCampo("buttonSimple"));
+        WebElement botao = utilitario.pesquisarElemento("buttonSimple");
+        botao.click();
+        assertEquals("Obrigado!", utilitario.pegarValorElemento("buttonSimple"));
     }
 
     @Test
@@ -119,39 +90,40 @@ public class FormularioTeste {
 
         WebElement link = webDriver.findElement(By.linkText("Voltar"));
         link.click();
-        assertEquals("Voltou!", webDriver.findElement(By.id("resultado")).getText());
+        assertEquals("Voltou!", utilitario.pesquisarElemento("resultado").getText());
     }
 
     @Test
     public void verificarTextoDaPagina() {
 
         assertEquals("campo de treinamento", webDriver.findElement(By.tagName("h3")).getText().toLowerCase());
-        assertEquals("cuidado onde clica, muitas armadilhas...", webDriver.findElement(By.className("facilAchar"))
-                .getText().toLowerCase());
+        assertEquals("cuidado onde clica, muitas armadilhas...",
+                utilitario.pesquisarElemento(By.className("facilAchar")).getText().toLowerCase());
     }
 
     @Test
     public void aceitarAlert() {
 
-        webDriver.findElement(By.id("alert")).click();
+        utilitario.pesquisarElemento("alert").click();
         Alert alert = webDriver.switchTo().alert();
+
         String textoAlert = alert.getText();
         alert.accept();
-        webDriver.findElement(By.id("elementosForm:nome")).sendKeys(textoAlert);
+        utilitario.inserirTextoCampo("elementosForm:nome", textoAlert);
         assertEquals("Alert Simples", textoAlert);
     }
 
     @Test
     public void confirmarCancelarAlert() {
 
-        webDriver.findElement(By.id("confirm")).click();
+        utilitario.pesquisarElemento("confirm").click();
         Alert alert = webDriver.switchTo().alert();
         assertEquals("Confirm Simples", alert.getText());
         alert.accept();
         assertEquals("Confirmado", alert.getText());
         alert.accept();
 
-        webDriver.findElement(By.id("confirm")).click();
+        utilitario.pesquisarElemento("confirm").click();
         alert = webDriver.switchTo().alert();
         assertEquals("Confirm Simples", alert.getText());
         alert.dismiss();
@@ -162,7 +134,7 @@ public class FormularioTeste {
     @Test
     public void enviarTextoParaAlerta() {
 
-        webDriver.findElement(By.id("prompt")).click();
+        utilitario.pesquisarElemento("prompt").click();
         Alert alert = webDriver.switchTo().alert();
         assertEquals("Digite um numero", alert.getText());
         alert.sendKeys("14");
@@ -176,22 +148,25 @@ public class FormularioTeste {
     @Test
     public void cadastrarComSucesso() {
 
-        webDriver.findElement(By.id("elementosForm:nome")).sendKeys("Henrique");
-        webDriver.findElement(By.id("elementosForm:sobrenome")).sendKeys("Almeida");
-        webDriver.findElement(By.id("elementosForm:sexo:0")).click();
-        webDriver.findElement(By.id("elementosForm:comidaFavorita:1")).click();
+        pagina.setNome("Henrique");
+        pagina.setSobrenome("Almeida");
+        pagina.setSexoMasculino();
+        pagina.setComidaFavoritaFrango();
+        pagina.setEscolaridade("Superior");
+        pagina.setEsporte("Karate");
+        pagina.inserirTextoSugestoes("Java e Kotlin são legais!");
+        pagina.clicarBotaoCadastrar();
 
-        Select selectEscolaridade = new Select(webDriver.findElement(By.id("elementosForm:escolaridade")));
-        selectEscolaridade.selectByVisibleText("Superior");
-
-        Select selectEsporte = new Select(webDriver.findElement(By.id("elementosForm:esportes")));
-        selectEsporte.selectByVisibleText("Corrida");
-
-        webDriver.findElement(By.id("elementosForm:sugestoes")).sendKeys("Eu gosto de estudar Java");
-        webDriver.findElement(By.id("elementosForm:cadastrar")).click();
-
-        assertTrue(webDriver.findElement(By.id("resultado")).getText().startsWith("Cadastrado!"));
-        assertTrue(webDriver.findElement(By.id("descNome")).getText().endsWith("Henrique"));
+        assertTrue(pagina.obterResultadoCadastro().startsWith("Cadastrado!"));
+        assertTrue(pagina.obterNomeCadastro().endsWith("Henrique"));
+        assertTrue(pagina.obterSobrenomeCadastro().endsWith("Almeida"));
+        assertEquals("sobrenome: almeida", pagina.obterSobrenomeCadastro().toLowerCase());
+        assertEquals("comida: frango", pagina.obterComidaFrangoCadastro().toLowerCase());
+        assertEquals("escolaridade: superior", pagina.obterEscolaridadeSuperiorCadastro().toLowerCase());
+        assertEquals("esportes: karate", pagina.obterEsporteKarateCadastro().toLowerCase());
+        assertEquals("sugestoes: java e kotlin são legais!", pagina.obterTextoSugestao().toLowerCase());
+        assertThat(pagina.obterTextoSugestao(),
+                equalToIgnoringCase("sugestoes: java e kotlin são legais!"));
     }
 
     @Test
