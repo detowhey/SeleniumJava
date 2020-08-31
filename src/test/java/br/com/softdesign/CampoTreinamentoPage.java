@@ -23,8 +23,20 @@ public class CampoTreinamentoPage {
         utilitarios.clicarElemento("elementosForm:sexo:0");
     }
 
+    public void setSexoFeminino() {
+        utilitarios.clicarElemento("elementosForm:sexo:1");
+    }
+
     public void setComidaFavoritaFrango() {
         utilitarios.clicarElemento("elementosForm:comidaFavorita:1");
+    }
+
+    public void setComidaFavoritaCarne() {
+        utilitarios.clicarElemento("elementosForm:comidaFavorita:0");
+    }
+
+    public void setComidaFavoritaVegetal() {
+        utilitarios.clicarElemento("elementosForm:comidaFavorita:2");
     }
 
     public void setEscolaridade(String textoVisivel) {
@@ -77,5 +89,10 @@ public class CampoTreinamentoPage {
 
     public String obterTextoAlertaConfirmar() {
         return utilitarios.pegarTextoAlertaAceitar();
+    }
+
+    public void setEsporte(String... valores) {
+        for (String valor : valores)
+            utilitarios.selecionarComboBox("elementosForm:esportes", valor);
     }
 }

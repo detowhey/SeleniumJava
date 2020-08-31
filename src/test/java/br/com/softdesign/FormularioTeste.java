@@ -4,18 +4,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.Select;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.equalToIgnoringCase;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class FormularioTeste {
 
@@ -46,7 +42,7 @@ public class FormularioTeste {
 
         pagina.setNome("Henrique");
         pagina.clicarBotaoCadastrar();
-        assertThat(pagina.obterTextoAlertaConfirmar(), equalToIgnoringCase("sobrenome eh obrigatorio"));
+        assertEquals("sobrenome eh obrigatorio", pagina.obterTextoAlertaConfirmar().toLowerCase());
     }
 
     @Test
@@ -165,8 +161,6 @@ public class FormularioTeste {
         assertEquals("escolaridade: superior", pagina.obterEscolaridadeSuperiorCadastro().toLowerCase());
         assertEquals("esportes: karate", pagina.obterEsporteKarateCadastro().toLowerCase());
         assertEquals("sugestoes: java e kotlin são legais!", pagina.obterTextoSugestao().toLowerCase());
-        assertThat(pagina.obterTextoSugestao(),
-                equalToIgnoringCase("sugestoes: java e kotlin são legais!"));
     }
 
     @Test
@@ -180,6 +174,18 @@ public class FormularioTeste {
         assertEquals("Frame OK!", mensagemAlert);
         webDriver.switchTo().defaultContent();
         webDriver.findElement(By.id("elementosForm:nome")).sendKeys(mensagemAlert);
+    }
+
+    @Test
+    public void validarEsporteIndeciso() {
+
+        pagina.setNome("Henrique");
+        pagina.setSobrenome("Almeida");
+        pagina.setSexoMasculino();
+        pagina.setComidaFavoritaFrango();
+        pagina.setEsporte("Karate", "O que eh esporte?");
+        pagina.clicarBotaoCadastrar();
+        assertEquals("Voce faz esporte ou nao?", utilitario.pegarTextoAlertaAceitar());
     }
 
     @Test
@@ -201,5 +207,11 @@ public class FormularioTeste {
         webDriver.findElement(By.tagName("textarea")).sendKeys("Java e Kotlin");
         webDriver.switchTo().window(webDriver.getWindowHandles().toArray()[0].toString());
         webDriver.findElement(By.tagName("textarea")).sendKeys("Java e Selenium");
+    }
+
+    @Test
+    public void testJavascript() {
+        JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
+        javascriptExecutor.executeScript("document.getElementById('elementosForm:nome').value = 'Henrique'");
     }
 }
