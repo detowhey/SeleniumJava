@@ -19,7 +19,6 @@ public class TestGoogle {
         WebDriver driver = new ChromeDriver();
 
         driver.get("http://www.google.com");
-//        driver.manage().window().setPosition(new Point(100, 100));
         driver.manage().window().maximize();
         driver.quit();
     }
